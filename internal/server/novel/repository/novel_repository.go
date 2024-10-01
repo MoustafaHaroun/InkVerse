@@ -17,6 +17,7 @@ type Novel struct {
 
 type NovelRepository interface {
 	GetAllNovels() ([]Novel, error)
+	AddNovel(author_id uuid.UUID, title string, synopsis string) error
 }
 
 type SQLNovelRepository struct {
@@ -46,4 +47,10 @@ func (r *SQLNovelRepository) GetAllNovels() ([]Novel, error) {
 	}
 
 	return novels, nil
+}
+
+func (r *SQLNovelRepository) AddNovel(author_id uuid.UUID, title string, synopsis string) error {
+	query := "INSERT INTO novels (author_id, title, synopsis) VALUES ($1,$2,$3)"
+	_, err := r.DB.Exec(query, author_id, title, synopsis)
+	return err
 }

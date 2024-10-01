@@ -36,6 +36,7 @@ func main() {
 	novelHandler := handler.NovelHandler{NovelService: novelService}
 
 	router.HandleFunc("GET /novels/", novelHandler.GetAllNovelsHandler)
+	router.HandleFunc("POST /novels/", novelHandler.AddNovelHandler)
 
 	server := http.Server{
 		Addr:    ":8000",
