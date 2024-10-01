@@ -39,9 +39,14 @@ func Migrate(db *sql.DB) {
 		log.Fatalf("Could not start migration: %v", err)
 	}
 
+	err = m.Down()
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("Migration failed down: %v", err)
+	}
+
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Migration failed: %v", err)
+		log.Fatalf("Migration failed up: %v", err)
 	}
 
 	log.Printf("Migration has successfully been done!")
