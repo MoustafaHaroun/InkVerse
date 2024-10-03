@@ -1,8 +1,10 @@
-package repository
+package novel
 
 import (
 	"database/sql"
+	"errors"
 
+	"github.com/MoustafaHaroun/InkVerse/internal/database"
 	"github.com/google/uuid"
 )
 
@@ -15,6 +17,8 @@ type Novel struct {
 	CreatedAt string    `json:"created_at"`
 }
 
+var ErrNovelExistsWithTitle = errors.New("novel with this title already exists")
+
 type NovelRepository interface {
 	GetAllNovels() ([]Novel, error)
 	AddNovel(author_id uuid.UUID, title string, synopsis string) error
@@ -25,7 +29,7 @@ type SQLNovelRepository struct {
 }
 
 func (r *SQLNovelRepository) GetAllNovels() ([]Novel, error) {
-	query := "SELECT id, author_id, title, synopsis, rating, created_at FROM novels"
+	query := "SELECT novel_id, author_id, title, synopsis, rating, created_at FROM novels"
 	rows, err := r.DB.Query(query)
 
 	if err != nil {
@@ -52,5 +56,11 @@ func (r *SQLNovelRepository) GetAllNovels() ([]Novel, error) {
 func (r *SQLNovelRepository) AddNovel(author_id uuid.UUID, title string, synopsis string) error {
 	query := "INSERT INTO novels (author_id, title, synopsis) VALUES ($1,$2,$3)"
 	_, err := r.DB.Exec(query, author_id, title, synopsis)
+
+	if err != nil {
+		if database.IsUniqueViolation(err) {
+			return ErrNovelExistsWithTitle
+		}
+	}
 	return err
 }

@@ -1,4 +1,4 @@
-package handler
+package novel
 
 import (
 	"encoding/json"
@@ -6,12 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/MoustafaHaroun/InkVerse/internal/server/novel/service"
 	"github.com/google/uuid"
 )
 
 type NovelHandler struct {
-	NovelService service.NovelService
+	NovelService NovelService
 }
 
 func (h *NovelHandler) GetAllNovelsHandler(w http.ResponseWriter, r *http.Request) {
