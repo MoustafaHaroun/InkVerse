@@ -7,7 +7,8 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // Import the file source driver
-	_ "github.com/lib/pq"                                // PostgreSQL driver
+	"github.com/lib/pq"
+	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 func Connect() *sql.DB {
@@ -50,4 +51,13 @@ func Migrate(db *sql.DB) {
 	}
 
 	log.Printf("Migration has successfully been done!")
+}
+
+func IsUniqueViolation(err error) bool {
+	if pqErr, ok := err.(*pq.Error); ok {
+		if pqErr.Code == "23505" {
+			return true
+		}
+	}
+	return false
 }
