@@ -43,6 +43,7 @@ func main() {
 	chapterHandler := chapter.ChapterHandler{ChapterService: chapterService}
 
 	router.HandleFunc("GET /chapters/{id}", chapterHandler.GetByNovelIdHandler)
+	router.HandleFunc("POST /chapters/", chapterHandler.AddChapterHandler)
 
 	server := http.Server{
 		Addr:    ":8000",

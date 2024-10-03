@@ -31,3 +31,24 @@ func (h *ChapterHandler) GetByNovelIdHandler(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(novels)
 }
+
+func (h *ChapterHandler) AddChapterHandler(w http.ResponseWriter, r *http.Request) {
+	var chapter struct {
+		NovelID uuid.UUID `json:"novel_id"`
+		Title   string    `json:"title"`
+		Content string    `json:"content"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&chapter); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.ChapterService.AddChapter(chapter.NovelID, chapter.Title, chapter.Content); err != nil {
+		http.Error(w, "Failed to add chapter", http.StatusInternalServerError)
+		slog.Error("Failed to add chapter:", slog.Any("error", err))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}

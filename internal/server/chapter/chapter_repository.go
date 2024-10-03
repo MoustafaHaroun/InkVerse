@@ -15,6 +15,7 @@ type Chapter struct {
 
 type ChapterRepository interface {
 	GetByNovelId(novel_id uuid.UUID) ([]Chapter, error)
+	AddChapter(novel_id uuid.UUID, title string, content string) error
 }
 
 type SQLChapterRepository struct {
@@ -45,4 +46,16 @@ func (r *SQLChapterRepository) GetByNovelId(novel_id uuid.UUID) ([]Chapter, erro
 	}
 
 	return chapters, nil
+}
+
+func (r *SQLChapterRepository) AddChapter(novel_id uuid.UUID, title string, content string) error {
+	query := "INSERT INTO chapters (novel_id, title, content) VALUES ($1,$2,$3)"
+
+	_, err := r.DB.Query(query, novel_id, title, content)
+
+	if err != nil {
+		return err
+	}
+
+	return err
 }
