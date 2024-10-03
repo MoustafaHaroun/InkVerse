@@ -7,9 +7,8 @@ import (
 	"os"
 
 	"github.com/MoustafaHaroun/InkVerse/internal/database"
-	"github.com/MoustafaHaroun/InkVerse/internal/server/novel/handler"
-	"github.com/MoustafaHaroun/InkVerse/internal/server/novel/repository"
-	"github.com/MoustafaHaroun/InkVerse/internal/server/novel/service"
+	"github.com/MoustafaHaroun/InkVerse/internal/server/chapter"
+	"github.com/MoustafaHaroun/InkVerse/internal/server/novel"
 )
 
 func main() {
@@ -31,12 +30,19 @@ func main() {
 	})
 
 	// novels
-	novelRepository := &repository.SQLNovelRepository{DB: dbConn}
-	novelService := service.NovelService{NovelRepository: novelRepository}
-	novelHandler := handler.NovelHandler{NovelService: novelService}
+	novelRepository := &novel.SQLNovelRepository{DB: dbConn}
+	novelService := novel.NovelService{NovelRepository: novelRepository}
+	novelHandler := novel.NovelHandler{NovelService: novelService}
 
 	router.HandleFunc("GET /novels/", novelHandler.GetAllNovelsHandler)
 	router.HandleFunc("POST /novels/", novelHandler.AddNovelHandler)
+
+	// chapter
+	chapterRepository := &chapter.SQLChapterRepository{DB: dbConn}
+	chapterService := chapter.ChapterService{ChapterRepository: chapterRepository}
+	chapterHandler := chapter.ChapterHandler{ChapterService: chapterService}
+
+	router.HandleFunc("GET /chapters/{id}", chapterHandler.GetByNovelIdHandler)
 
 	server := http.Server{
 		Addr:    ":8000",

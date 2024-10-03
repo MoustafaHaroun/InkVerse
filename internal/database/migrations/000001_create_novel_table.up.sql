@@ -1,10 +1,12 @@
 CREATE TABLE IF NOT EXISTS novels (
- id uuid DEFAULT gen_random_uuid(),
+ novel_id uuid DEFAULT gen_random_uuid(),
  author_id uuid NOT NULL, 
- title VARCHAR(255) NOT NULL,
+ title VARCHAR(255) UNIQUE NOT NULL,
  synopsis VARCHAR(255) NOT NULL,
  rating DOUBLE PRECISION DEFAULT 0,
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+ PRIMARY KEY(novel_id)
 );
 
 INSERT INTO novels (author_id, title, synopsis, rating)
