@@ -9,6 +9,7 @@ import (
 	"github.com/MoustafaHaroun/InkVerse/internal/database"
 	"github.com/MoustafaHaroun/InkVerse/internal/server/chapter"
 	"github.com/MoustafaHaroun/InkVerse/internal/server/novel"
+	"github.com/MoustafaHaroun/InkVerse/pkg/middleware"
 )
 
 func main() {
@@ -16,6 +17,12 @@ func main() {
 	slog.SetDefault(logger)
 
 	router := http.NewServeMux()
+
+	// Add middleware stack
+	stack := middleware.CreateStack(
+		middleware.Logging,
+		middleware.CORS,
+	)
 
 	// Open database connection
 	dbConn := database.Connect()
@@ -47,7 +54,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    ":8000",
-		Handler: router,
+		Handler: stack(router),
 	}
 
 	slog.Info("Server starting", slog.String("addr", server.Addr))
