@@ -1,9 +1,11 @@
-# build commands
+
+# Build commands
 build:
-	@go build -o bin/api cmd/api/main.go
+	@go build -o bin/api backend/cmd/api/main.go
 
 run:
-	@go run cmd/api/main.go
+	@cd backend && go run cmd/api/main.go 
+	@cd frontend && npm run dev
 
 # docker commands
 docker-up:
