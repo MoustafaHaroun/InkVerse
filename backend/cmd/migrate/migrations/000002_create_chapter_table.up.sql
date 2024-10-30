@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS chapters (
     novel_id uuid NOT NULL,
     title VARCHAR(255) NOT NULL,
     content VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY(novel_id),
     CONSTRAINT fk_novel

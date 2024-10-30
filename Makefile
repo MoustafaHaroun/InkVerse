@@ -5,7 +5,9 @@ build:
 
 run:
 	@cd backend && go run cmd/api/main.go 
-	@cd frontend && npm run dev
+
+migration:
+	@cd backend && go run cmd/migrate/main.go
 
 # docker commands
 docker-up:

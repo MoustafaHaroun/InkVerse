@@ -3,16 +3,15 @@ package database
 import (
 	"database/sql"
 	"log"
+	"log/slog"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // Import the file source driver
 	"github.com/lib/pq"
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 func Connect() *sql.DB {
-	connString := "postgresql://admin:admin@localhost:5432/app?sslmode=disable"
+	connString := "postgresql://admin:admin@localhost:5432/app?sslmode=disable" //TODO: create this string based on a env
 
 	db, err := sql.Open("postgres", connString)
 
@@ -21,36 +20,9 @@ func Connect() *sql.DB {
 		log.Fatalf("Failed to make a connection to the database: %v", err)
 	}
 
-	log.Printf("Connected to database has been established!")
+	slog.Info("Connected to database has been established!")
 
 	return db
-}
-
-func Migrate(db *sql.DB) {
-	log.Printf("Migration running...")
-
-	// Get the driver of postgresql
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		log.Fatalf("Could not start SQL driver: %v", err)
-	}
-
-	m, err := migrate.NewWithDatabaseInstance("file://internal/database/migrations", "postgres", driver)
-	if err != nil {
-		log.Fatalf("Could not start migration: %v", err)
-	}
-
-	err = m.Down()
-	if err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Migration failed down: %v", err)
-	}
-
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Migration failed up: %v", err)
-	}
-
-	log.Printf("Migration has successfully been done!")
 }
 
 func IsUniqueViolation(err error) bool {

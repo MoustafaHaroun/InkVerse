@@ -9,12 +9,12 @@ import (
 	"github.com/MoustafaHaroun/InkVerse/internal/database"
 	"github.com/MoustafaHaroun/InkVerse/internal/server/chapter"
 	"github.com/MoustafaHaroun/InkVerse/internal/server/novel"
+	"github.com/MoustafaHaroun/InkVerse/internal/server/user"
 	"github.com/MoustafaHaroun/InkVerse/pkg/middleware"
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(logger)
+	setLogger()
 
 	router := http.NewServeMux()
 
@@ -28,29 +28,20 @@ func main() {
 	dbConn := database.Connect()
 	defer dbConn.Close()
 
-	// Run Migrations
-	database.Migrate(dbConn)
+	// user
+	userRepository := user.NewUserRepository(dbConn)
+	userHandler := user.NewUserHandler(*userRepository)
+	userHandler.RegisterRoutes(router)
 
-	// Health check
-	router.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	// novels
-	novelRepository := &novel.SQLNovelRepository{DB: dbConn}
-	novelService := novel.NovelService{NovelRepository: novelRepository}
-	novelHandler := novel.NovelHandler{NovelService: novelService}
-
-	router.HandleFunc("GET /novels/", novelHandler.GetAllNovelsHandler)
-	router.HandleFunc("POST /novels/", novelHandler.AddNovelHandler)
+	// novel
+	novelRepository := novel.NewSQLNovelRepository(dbConn)
+	novelHandler := novel.NewNovelHandler(novelRepository)
+	novelHandler.RegisterRoutes(router)
 
 	// chapter
-	chapterRepository := &chapter.SQLChapterRepository{DB: dbConn}
-	chapterService := chapter.ChapterService{ChapterRepository: chapterRepository}
-	chapterHandler := chapter.ChapterHandler{ChapterService: chapterService}
-
-	router.HandleFunc("GET /chapters/{id}", chapterHandler.GetByNovelIdHandler)
-	router.HandleFunc("POST /chapters/", chapterHandler.AddChapterHandler)
+	chapterRepository := chapter.NewSQLChapterRepository(dbConn)
+	chapterHandler := chapter.NewChapterHandler(chapterRepository, userRepository)
+	chapterHandler.RegisterRoutes(router)
 
 	server := http.Server{
 		Addr:    ":8000",
@@ -62,4 +53,9 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("Failed to start server", slog.Any("error", err))
 	}
+}
+
+func setLogger() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 }
